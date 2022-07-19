@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+
+  db:
+    container_name: postgres
+    image: postgres:13.2
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./src/database/config/init.sql:/docker-entrypoint-initdb.d/10-init.sql
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_DB: go-rest-api-db
+      POSTGRES_PASSWORD: password
