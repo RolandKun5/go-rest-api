@@ -6,5 +6,6 @@ import (
 )
 
 func Init(router *gin.Engine) {
+	router.GET("users/:userid", handlers.GetUserById)
 	router.GET("/users", handlers.GetUsers)
 }
