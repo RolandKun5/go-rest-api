@@ -8,4 +8,6 @@ import (
 func Init(router *gin.Engine) {
 	router.GET("users/:userid", handlers.GetUserById)
 	router.GET("/users", handlers.GetUsers)
+	router.POST("/users", handlers.CreateNewUser)
+	router.PATCH("/users", handlers.UpdateUser)
 }
