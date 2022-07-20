@@ -1,47 +1,47 @@
 package handlers
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/RolandKun5/go-rest-api/src/database"
+	"github.com/RolandKun5/go-rest-api/src/services"
 	"github.com/RolandKun5/go-rest-api/src/types"
+	"github.com/RolandKun5/go-rest-api/src/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func getPermissionLevels(context *gin.Context) ([]types.PermissionLevel, error) {
-	var permissionLevels []types.PermissionLevel
+func GetUserById(context *gin.Context) {
+	id := context.Param("userid")
+	var rawUser types.RawUser
 
-	const query = "SELECT * FROM permission_levels"
+	permissionLevels, err := services.GetPermissionLevels(context)
 
-	rows, err := database.Db.Query(query)
 	if err != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return nil, err
+		return
 	}
 
-	defer rows.Close()
+	const query = "SELECT * FROM users WHERE id = $1"
 
-	for rows.Next() {
-		var permissionLevel types.PermissionLevel
-		if err := rows.Scan(&permissionLevel.ID, &permissionLevel.PermissionLevel); err != nil {
+	if err := database.Db.QueryRow(query, id).Scan(&rawUser.ID, &rawUser.UserName, &rawUser.PermissionLevelID, &rawUser.FirstName, &rawUser.LastName,
+		&rawUser.Email, &rawUser.City, &rawUser.CreatedAt, &rawUser.UpdatedAt); err != nil {
+		if err == sql.ErrNoRows {
 			context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return nil, err
+			return
 		}
-		permissionLevels = append(permissionLevels, permissionLevel)
-	}
-
-	if err = rows.Err(); err != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		return nil, err
+		return
 	}
 
-	return permissionLevels, nil
+	var user = utils.SetPermissionLevel(rawUser, permissionLevels)
 
+	context.IndentedJSON(http.StatusOK, user)
 }
 
 func GetUsers(context *gin.Context) {
 	var users []types.User
-	permissionLevels, err := getPermissionLevels(context)
+	permissionLevels, err := services.GetPermissionLevels(context)
 
 	if err != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -65,20 +65,7 @@ func GetUsers(context *gin.Context) {
 			context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
-		var user types.User
-		for _, s := range permissionLevels {
-			if s.ID == rawUser.PermissionLevelID {
-				user.ID = rawUser.ID
-				user.UserName = rawUser.UserName
-				user.PermissionLevel = s.PermissionLevel
-				user.FirstName = rawUser.FirstName
-				user.LastName = rawUser.LastName
-				user.Email = rawUser.Email
-				user.City = rawUser.City
-				user.CreatedAt = rawUser.CreatedAt
-				user.UpdatedAt = rawUser.UpdatedAt
-			}
-		}
+		var user = utils.SetPermissionLevel(rawUser, permissionLevels)
 		users = append(users, user)
 	}
 
