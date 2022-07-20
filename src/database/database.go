@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 var Db *sql.DB
@@ -19,7 +20,7 @@ type connection struct {
 }
 
 func Init() {
-	err := godotenv.Load("/.env")
+	err := godotenv.Load("database/config/.env")
 
 	if err != nil {
 		fmt.Printf("Error loading .env file: %s\n", err.Error())
