@@ -12,8 +12,8 @@ create table users (
   "last_name" text,
   "email" text not null,
   "city" text,
-  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT (now()),
-  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT (now()),
+  "created_at" TIMESTAMPTZ NOT NULL DEFAULT (now()),
+  "updated_at" TIMESTAMPTZ NOT NULL DEFAULT (now()),
   primary key(id),
   CONSTRAINT "permission_level_fk" FOREIGN KEY ("permission_level_id") REFERENCES permission_levels("id")
 );
