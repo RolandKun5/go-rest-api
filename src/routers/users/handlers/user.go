@@ -102,7 +102,8 @@ func CreateNewUser(context *gin.Context) {
 func UpdateUser(context *gin.Context) {
 	var user types.User
 	permissionLevels, _ := services.GetPermissionLevels(context)
-	currentTime, _ := time.Parse(time.RFC3339, "2016-02-02T15:04:05.000Z")
+	updatedAt := time.Now().Format(time.RFC3339Nano)
+
 	if err := context.BindJSON(&user); err != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
@@ -112,7 +113,7 @@ func UpdateUser(context *gin.Context) {
 
 	const query = "UPDATE users SET user_name=$1, permission_level_id=$2, first_name=$3, last_name=$4, email=$5, city=$6, updated_at=$7 WHERE id = $8"
 
-	_, err := database.Db.Exec(query, rawUser.UserName, rawUser.PermissionLevelID, rawUser.FirstName, rawUser.LastName, rawUser.Email, rawUser.City, currentTime.Format(time.RFC3339), rawUser.ID)
+	_, err := database.Db.Exec(query, rawUser.UserName, rawUser.PermissionLevelID, rawUser.FirstName, rawUser.LastName, rawUser.Email, rawUser.City, updatedAt, rawUser.ID)
 
 	if err != nil {
 		context.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
